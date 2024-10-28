@@ -6,6 +6,11 @@ gpio_keys {
     label = "LED 1";
 };
 };
+
+&flexcomm4 {
+	status = "okay";
+};
+
 aliases {
     led-yellow = &ledyellow;
 };
