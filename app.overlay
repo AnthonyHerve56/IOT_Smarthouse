@@ -1,18 +1,29 @@
 /{
-gpio_keys {
-    compatible = "gpio-keys";
-    ledyellow: led_yellow {
-    gpios = <&gpio0 12 GPIO_ACTIVE_HIGH>;
-    label = "LED 1";
-};
+    gpio_keys {
+        compatible = "gpio-keys";
+        ledyellow: led_yellow {
+            gpios = <&gpio0 12 GPIO_ACTIVE_HIGH>;
+            label = "LED 1";
+        };
+    };
+    aliases {
+        led-yellow = &ledyellow;
+    };
 };
 
-&flexcomm4 {
-	status = "okay";
+
+/* I2C device example */
+&i2c2 {
+    my_i2c_device: touchscreen@27 {
+            compatible = "...";
+            label = "TOUCHSCREEN";
+            /* reg is the I2C device address.
+             * It must match the node's unit address. */
+            reg = <27>;
+
+            /* Configure other I2C device properties as needed.
+             * Find your device's DT binding for details. */
+    };
 };
 
-aliases {
-    led-yellow = &ledyellow;
-};
-};
     
