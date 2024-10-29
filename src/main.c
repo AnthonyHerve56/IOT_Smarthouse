@@ -7,14 +7,16 @@
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/misc/grove_lcd/grove_lcd.h>
+#include "../inc/lcd_screen_i2c.h"
+#include <zephyr/drivers/i2c.h>
 #define LED_YELLOW_NODE DT_ALIAS(led_yellow)
 #define LCD DT_ALIAS(lcd)
 const struct gpio_dt_spec led_yellow_gpio = GPIO_DT_SPEC_GET_OR(LED_YELLOW_NODE, gpios, {0});
-
+const struct i2c_dt_spec lcd_screen = I2C_DT_SPEC_GET(LCD);
 int main(void) {
 	gpio_pin_configure_dt(&led_yellow_gpio, GPIO_OUTPUT_HIGH);
-	const struct device *glcd;
-	glcd = device_get_binding(LCD);
-	glcd_print(glcd,"Hello",27);
+
+	
+	init_lcd(&lcd_screen);
 }
 

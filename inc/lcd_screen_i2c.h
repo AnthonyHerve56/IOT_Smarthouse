@@ -28,7 +28,7 @@ struct i2c_dt_spec;
 #define INTRUDER_MSG_1 "INTRUDER"
 #define INTRUDER_MSG_2 "LEAVE !"
 
-void init_lcd(const struct i2c_dt_spec *_dev_lcd_screen);
+void init_lcd(const struct i2c_dt_spec *dev_lcd_screen);
 void write_lcd(const struct i2c_dt_spec *dev_lcd_screen, const char *msg, uint8_t line);
 void write_lcd_clear(const struct i2c_dt_spec *dev_lcd_screen, const char *msg, uint8_t line);
 
