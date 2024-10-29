@@ -8,22 +8,15 @@
     };
     aliases {
         led-yellow = &ledyellow;
+        lcd =&lcdscreen;
     };
 };
 
 
-/* I2C device example */
-&i2c2 {
-    my_i2c_device: touchscreen@27 {
-            compatible = "...";
-            label = "TOUCHSCREEN";
-            /* reg is the I2C device address.
-             * It must match the node's unit address. */
-            reg = <27>;
-
-            /* Configure other I2C device properties as needed.
-             * Find your device's DT binding for details. */
-    };
+&i2c0 {
+	lcdscreen: lcdscreen@27 {
+		reg = <0x27>;
+		compatible = "i2c-device";
+		status = "okay";
+	};
 };
-
-    
