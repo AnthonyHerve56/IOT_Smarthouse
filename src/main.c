@@ -16,7 +16,8 @@
 //Define
 #define LED_YELLOW_NODE DT_ALIAS(led_yellow)
 #define LCD_NODE DT_ALIAS(lcd)
-
+#define SW0_NODE	DT_ALIAS(sw0)
+#define SW1_NODE	DT_ALIAS(sw1)
 
 
 //Main code

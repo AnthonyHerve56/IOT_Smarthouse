@@ -18,10 +18,25 @@
 			<&adc0 6>;
 			
 	};
+    buttons {
+        compatible = "gpio-keys";
+        button0: button_0 {
+                gpios = < &gpio0 16 GPIO_PULL_UP  >;
+                label = "Gauche";
+        };
+        button1: button_1 {
+            gpios = < &gpio0 27 GPIO_PULL_UP  >;
+            label = "Droite";
+    };
+        /* ... other buttons ... */
+    };
 
     aliases {
         led-yellow = &ledyellow;
         lcd =&lcdscreen;
+        sw0 = &button0;
+        sw1 = &button1;
+    
     };
 };
 
