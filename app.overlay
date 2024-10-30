@@ -18,7 +18,6 @@
     aliases {
         led-yellow = &ledyellow;
         lcd =&lcdscreen;
-        aosong-dht=&dht11;
     };
 };
 

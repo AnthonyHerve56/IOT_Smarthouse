@@ -23,8 +23,28 @@ const struct device *const dht11 = DEVICE_DT_GET_ONE(aosong_dht); //Temperature
 int main(void) {
 	gpio_pin_configure_dt(&led_yellow_gpio, GPIO_OUTPUT_HIGH);
 	init_lcd(&lcd_screen);
+	int ret;
+	struct sensor_value temp_value;
 
-	//int ret = sensor_sample_fetch(dht11);
-	//printk("%d",ret);
+	if (!device_is_ready(dht11)) {
+		printk("sensor: device not ready.\n");
+		return 0;
+	}
+
+	printk("Polling magnetometer data from %s.\n", dht11->name);
+
+	while (1) {
+		ret = sensor_sample_fetch(dht11);
+		if (ret) {
+			printk("sensor_sample_fetch failed ret %d\n", ret);
+			return 0;
+		}
+		ret = sensor_channel_get(dht11, SENSOR_CHAN_AMBIENT_TEMP, &temp_value);
+		printf("ambiant temp = ( %f )\n",
+		       sensor_value_to_double(&temp_value));
+
+		k_sleep(K_MSEC(10000));
+	}
+	return 0;
 }
 
