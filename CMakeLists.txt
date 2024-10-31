@@ -9,5 +9,5 @@ target_sources(app PRIVATE
 src/main.c 
 src/lcd_screen_i2c.c
 src/temp_sensor_steam.c
-
+src/button.c
 )

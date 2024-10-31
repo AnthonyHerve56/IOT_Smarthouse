@@ -20,16 +20,9 @@
 #define SW0_NODE	DT_ALIAS(sw0)
 #define SW1_NODE	DT_ALIAS(sw1)
 const k_tid_t thread2_id;
+bool flag_thread_2=false;
 
-//Bouton 0
-static const struct gpio_dt_spec button0 = GPIO_DT_SPEC_GET_OR(SW0_NODE, gpios,
-							      {0});
-static struct gpio_callback button0_cb_data;
 
-//Bouton 1
-static const struct gpio_dt_spec button1 = GPIO_DT_SPEC_GET_OR(SW1_NODE, gpios,
-							      {0});
-static struct gpio_callback button1_cb_data;
 
 //Main code
 const struct gpio_dt_spec led_yellow_gpio = GPIO_DT_SPEC_GET_OR(LED_YELLOW_NODE, gpios, {0});
@@ -42,68 +35,85 @@ void thread1(){ // Lecture de la température et de Steam toutes les 10 sec
 
 }
 void thread2(){ // Lecture de la température et de Steam toutes les 10 sec
-		while(1){
-		printk("A la sieste");
+	while(1){
+		printk("flag_thread_2 = %d",flag_thread_2);
+		if(flag_thread_2)
+		{
+			printk("Je suis réveille\n");
+			write_lcd(&lcd_screen, "                ", LCD_LINE_1);
+			write_lcd(&lcd_screen, "                ", LCD_LINE_2);
+			write_lcd(&lcd_screen, "Yipi", LCD_LINE_1);
+			flag_thread_2=false;
+			
+		}
 		k_thread_suspend(thread2_id);
+		
 	}
 
 }
 
-void button0_pressed(const struct device *dev, struct gpio_callback *cb,
-		    uint32_t pins)
-{
-	printk("Gauche");
+/*
+Le code des boutons a été récupéré depuis ce dépot GIT : 
+https://github.com/ubieda/zephyr_button_debouncing/tree/master/src
+*/
 
-}
-void button1_pressed(const struct device *dev, struct gpio_callback *cb,
-		    uint32_t pins)
+static int helper_button_evt_str(enum button_evt evt)
 {
-	printk("Droite");
-	k_thread_resume(thread2_id);
+	switch (evt) {
+	case BUTTON_EVT_PRESSED:
+		return 1;
+	case BUTTON_EVT_RELEASED:
+		return 0;
+	default:
+		return -1;
+	}
 }
+
+void button0_event_handler(enum button_evt evt)
+{
+	
+	if(helper_button_evt_str(evt))
+	{
+		printk("Plop\n");
+		flag_thread_2=true;
+		k_thread_resume(thread2_id);
+	}
+		
+	
+	
+}
+void button1_event_handler(enum button_evt evt)
+{
+	printk("Button event: %d\n", helper_button_evt_str(evt));
+	
+}
+
+
 int main(void) {
 	gpio_pin_configure_dt(&led_yellow_gpio, GPIO_OUTPUT_HIGH);
 	init_lcd(&lcd_screen);
 	
-	//Interrupt bouton 0
 
-	int ret0 = gpio_pin_configure_dt(&button0, GPIO_INPUT);
-	if (ret0 != 0) {
-		printk("Error %d: failed to configure %s pin %d\n",
-		       ret0, button0.port->name, button0.pin);
+	int err0 = -1;
+
+	printk("Button Debouncing Sample!\n");
+
+	err0 = button0_init(button0_event_handler);
+	if (err0) {
+		printk("Button Init failed: %d\n", err0);
 		return 0;
 	}
 
-	ret0 = gpio_pin_interrupt_configure_dt(&button0,
-					      GPIO_INT_EDGE_TO_ACTIVE);
-	if (ret0 != 0) {
-		printk("Error %d: failed to configure interrupt on %s pin %d\n",
-			ret0, button0.port->name, button0.pin);
+	int err1 = -1;
+
+	printk("Button Debouncing Sample!\n");
+
+	err1 = button1_init(button1_event_handler);
+	if (err1) {
+		printk("Button Init failed: %d\n", err1);
 		return 0;
 	}
 
-	gpio_init_callback(&button0_cb_data, button0_pressed, BIT(button0.pin));
-	gpio_add_callback(button0.port, &button0_cb_data);
-
-	//Interrupt bouton 1
-
-	int ret1 = gpio_pin_configure_dt(&button0, GPIO_INPUT);
-	if (ret1 != 0) {
-		printk("Error %d: failed to configure %s pin %d\n",
-		       ret1, button1.port->name, button1.pin);
-		return 0;
-	}
-
-	ret1 = gpio_pin_interrupt_configure_dt(&button1,
-					      GPIO_INT_EDGE_TO_ACTIVE);
-	if (ret1 != 0) {
-		printk("Error %d: failed to configure interrupt on %s pin %d\n",
-			ret1, button1.port->name, button1.pin);
-		return 0;
-	}
-
-	gpio_init_callback(&button1_cb_data, button1_pressed, BIT(button1.pin));
-	gpio_add_callback(button1.port, &button1_cb_data);
 
 
 
