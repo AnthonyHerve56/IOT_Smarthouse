@@ -14,19 +14,25 @@
 #include <zephyr/drivers/adc.h>
 #include "../inc/temp_sensor_steam.h"
 #include "../inc/button.h"
+#include <zephyr/drivers/pwm.h>
 //Define
 #define LED_YELLOW_NODE DT_ALIAS(led_yellow)
 #define LCD_NODE DT_ALIAS(lcd)
 #define SW0_NODE	DT_ALIAS(sw0)
 #define SW1_NODE	DT_ALIAS(sw1)
+#define BUZZER_NODE DT_ALIAS(buzzer)
+
 const k_tid_t thread2_id;
+const k_tid_t thread3_id;
 bool flag_thread_2=false;
-
-
+bool flag_thread_3=false;
 
 //Main code
 const struct gpio_dt_spec led_yellow_gpio = GPIO_DT_SPEC_GET_OR(LED_YELLOW_NODE, gpios, {0});
 const struct i2c_dt_spec lcd_screen = I2C_DT_SPEC_GET(LCD_NODE);
+const struct gpio_dt_spec buzzer = GPIO_DT_SPEC_GET_OR(BUZZER_NODE, gpios, {0});
+
+
 void thread1(){ // Lecture de la température et de Steam toutes les 10 sec
 	while(1){
 		read_temp_and_steam_sensor();
@@ -36,7 +42,6 @@ void thread1(){ // Lecture de la température et de Steam toutes les 10 sec
 }
 void thread2(){ // Lecture de la température et de Steam toutes les 10 sec
 	while(1){
-		printk("flag_thread_2 = %d",flag_thread_2);
 		if(flag_thread_2)
 		{
 			printk("Je suis réveille\n");
@@ -51,7 +56,25 @@ void thread2(){ // Lecture de la température et de Steam toutes les 10 sec
 	}
 
 }
+void thread3(){ // Lecture de la température et de Steam toutes les 10 sec
+	while(1){
+		
+		if(flag_thread_3)
+		{
+			printk("Je suis ici \n");
+			gpio_pin_set_dt(&buzzer, 1);
+		}
+		else{
+			printk("Je suis la \n");
+			gpio_pin_set_dt(&buzzer, 0);
+		}
+		k_thread_suspend(thread3_id);
+		
+		
+		
+	}
 
+}
 /*
 Le code des boutons a été récupéré depuis ce dépot GIT : 
 https://github.com/ubieda/zephyr_button_debouncing/tree/master/src
@@ -84,13 +107,21 @@ void button0_event_handler(enum button_evt evt)
 }
 void button1_event_handler(enum button_evt evt)
 {
-	printk("Button event: %d\n", helper_button_evt_str(evt));
+	if(helper_button_evt_str(evt))
+	{
+		k_thread_resume(thread3_id);
+		printk("Plop son\n %d",flag_thread_3);
+		flag_thread_3=!flag_thread_3;
+		
+	}
+
 	
 }
 
 
 int main(void) {
 	gpio_pin_configure_dt(&led_yellow_gpio, GPIO_OUTPUT_HIGH);
+	gpio_pin_configure_dt(&buzzer, GPIO_OUTPUT_LOW);
 	init_lcd(&lcd_screen);
 	
 
@@ -119,10 +150,10 @@ int main(void) {
 
 
 
-
 }
 
 
 
 K_THREAD_DEFINE(thread1_id,1024,thread1,NULL,NULL,NULL,9,0,0);
 K_THREAD_DEFINE(thread2_id,1024,thread2,NULL,NULL,NULL,9,0,0);
+K_THREAD_DEFINE(thread3_id,1024,thread3,NULL,NULL,NULL,9,0,0);

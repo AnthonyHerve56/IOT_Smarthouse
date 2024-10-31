@@ -11,13 +11,19 @@
             dio-gpios = <&gpio0 17 GPIO_ACTIVE_LOW>;
             label = "XHT11";
         };
+        buzzer: buzzer {
+            gpios = <&gpio0 25 GPIO_ACTIVE_LOW>;
+            label = "Buzzer";
+        };
     };
     
 	zephyr,user {
 		io-channels =
 			<&adc0 6>;
+        
 			
 	};
+
     buttons {
         compatible = "gpio-keys";
         button0: button_0 {
@@ -31,11 +37,13 @@
         /* ... other buttons ... */
     };
 
+
     aliases {
         led-yellow = &ledyellow;
         lcd =&lcdscreen;
         sw0 = &button0;
         sw1 = &button1;
+        buzzer = &buzzer;
     
     };
 };
